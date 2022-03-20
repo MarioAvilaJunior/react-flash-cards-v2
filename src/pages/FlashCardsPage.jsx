@@ -5,56 +5,94 @@ import FlashCards from "../components/FlashCards";
 import Header from "../components/Header";
 import Main from "../components/Main";
 import RadioButton from "../components/RadioButton";
+import Loading from "../components/Loading";
 import { apiGetAllFlashCards } from "../services/apiService";
 import { helperShuffleArray } from "../helpers/arrayHelpers";
+import Error from "../components/Error";
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
+  const [studyCards, setStudyCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [radioButtonShowTitle, setRadioButtonShowTitle] = useState(true);
 
   useEffect(() => {
-    apiGetAllFlashCards().then((allFlashCards) => {
+    /*apiGetAllFlashCards().then((allFlashCards) => {
       setAllCards(allFlashCards);
-    });
+    });*/
+    // IIFE
+    (async () => {
+      try {
+        const backEndAllCards = await apiGetAllFlashCards();
+        setAllCards(backEndAllCards);
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
+      } catch (error) {
+        setError(error.message);
+      }
+    })();
+    /*  async function getAllCards() {
+      const backEndAllCards = await apiGetAllFlashCards();
+      setAllCards(backEndAllCards);
+    }
+
+    getAllCards();*/
   }, []);
 
   function handleButtonClick() {
-    const shuffledCards = helperShuffleArray(allCards);
+    const shuffledCards = helperShuffleArray(studyCards);
 
-    setAllCards(shuffledCards);
+    setStudyCards(shuffledCards);
   }
 
   function handleRadioShowDescriptionClick() {
     // prettier-ignore
     const updatedCards = 
-      [...allCards].map(card => ({...card, showTitle: false}));
+      [...studyCards].map(card => ({...card, showTitle: false}));
 
-    setAllCards(updatedCards);
+    setStudyCards(updatedCards);
     setRadioButtonShowTitle(false);
   }
+
+  useEffect(() => {
+    setStudyCards(
+      allCards.map((flashCard) => ({ ...flashCard, showTitle: true }))
+    );
+  }, [allCards]);
 
   function handleRadioShowTitleClick() {
     // prettier-ignore
     const updatedCards = 
-      [...allCards].map(card => ({...card, showTitle: true}));
+      [...studyCards].map(card => ({...card, showTitle: true}));
 
-    setAllCards(updatedCards);
+    setStudyCards(updatedCards);
 
     setRadioButtonShowTitle(true);
   }
 
   function handleToggleFlashCard(cardId) {
-    const updatedCards = [...allCards];
+    const updatedCards = [...studyCards];
     const cardIndex = updatedCards.findIndex((card) => card.id === cardId);
     updatedCards[cardIndex].showTitle = !updatedCards[cardIndex].showTitle;
 
-    setAllCards(updatedCards);
+    setStudyCards(updatedCards);
   }
 
-  return (
-    <>
-      <Header>react-flash-cards-v2</Header>
-      <Main>
+  let mainJsx = (
+    <div className="flex justify-center my-4">
+      <Loading />
+    </div>
+  );
+
+  if (error) {
+    mainJsx = <Error>{error}</Error>;
+  }
+
+  if (!loading) {
+    mainJsx = (
+      <>
         <div className="text-center mb-4">
           <Button onButtonClick={handleButtonClick}>Embaralhar cards</Button>
         </div>
@@ -80,7 +118,7 @@ export default function FlashCardsPage() {
         </div>
 
         <FlashCards>
-          {allCards.map(({ id, title, description, showTitle }) => {
+          {studyCards.map(({ id, title, description, showTitle }) => {
             return (
               <FlashCard
                 key={id}
@@ -93,7 +131,14 @@ export default function FlashCardsPage() {
             );
           })}
         </FlashCards>
-      </Main>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Header>react-flash-cards-v2</Header>
+      <Main>{mainJsx}</Main>
     </>
   );
 }
