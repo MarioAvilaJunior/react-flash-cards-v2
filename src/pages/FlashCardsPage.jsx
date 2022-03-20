@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import "react-tabs/style/react-tabs.css";
 import Button from "../components/Button";
 import FlashCard from "../components/FlashCard";
 import FlashCards from "../components/FlashCards";
@@ -9,6 +11,7 @@ import Loading from "../components/Loading";
 import { apiGetAllFlashCards } from "../services/apiService";
 import { helperShuffleArray } from "../helpers/arrayHelpers";
 import Error from "../components/Error";
+import FlashCardItem from "../components/FlashCardItem";
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
@@ -80,6 +83,10 @@ export default function FlashCardsPage() {
     setStudyCards(updatedCards);
   }
 
+  const deleteHandler = (flashCardId) => {
+    console.log(flashCardId);
+  };
+
   let mainJsx = (
     <div className="flex justify-center my-4">
       <Loading />
@@ -138,7 +145,29 @@ export default function FlashCardsPage() {
   return (
     <>
       <Header>react-flash-cards-v2</Header>
-      <Main>{mainJsx}</Main>
+      <Tabs>
+        <TabList>
+          <Tab>Listagem</Tab>
+          <Tab>Cadastro</Tab>
+          <Tab>Estudo</Tab>
+        </TabList>
+
+        <TabPanel>
+          {allCards.map((flashCard) => {
+            return (
+              <FlashCardItem key={flashCard.id} onDelete={deleteHandler}>
+                {flashCard}
+              </FlashCardItem>
+            );
+          })}
+        </TabPanel>
+        <TabPanel>
+          <h2>Any content 2</h2>
+        </TabPanel>
+        <TabPanel>
+          <Main>{mainJsx}</Main>
+        </TabPanel>
+      </Tabs>
     </>
   );
 }
