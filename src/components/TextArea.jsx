@@ -16,6 +16,8 @@ export default function TextArea({
     }
   }
 
+  const textAreaLenght = inputValue.length;
+
   return (
     <div className="flex flex-col my-4">
       <label className="text-sm mb-1" htmlFor={id}>
@@ -31,7 +33,9 @@ export default function TextArea({
         value={inputValue}
         onChange={handleInputChange}
       />
-      <div></div>
+      <div className="text-right">
+        {textAreaLenght} / {maxLength}
+      </div>
     </div>
   );
 }

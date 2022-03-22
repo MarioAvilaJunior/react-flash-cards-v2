@@ -104,6 +104,14 @@ export default function FlashCardsPage() {
     setSelectedFlashCard(null);
   };
 
+  const persistHandler = (createMode, title, description) => {
+    if (createMode) {
+      console.log("Criação");
+    } else {
+      console.log("Edição");
+    }
+  };
+
   let mainJsx = (
     <div className="flex justify-center my-4">
       <Loading />
@@ -184,7 +192,7 @@ export default function FlashCardsPage() {
         </TabPanel>
         <TabPanel>
           <Button onButtonClick={newFlashCardHandler}>Novo Flash Card</Button>
-          <FlashCardForm createMode={createMode} />
+          <FlashCardForm createMode={createMode} onPersist={persistHandler} />
         </TabPanel>
         <TabPanel>
           <Main>{mainJsx}</Main>
