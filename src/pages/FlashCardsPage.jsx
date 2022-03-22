@@ -12,12 +12,16 @@ import { apiGetAllFlashCards } from "../services/apiService";
 import { helperShuffleArray } from "../helpers/arrayHelpers";
 import Error from "../components/Error";
 import FlashCardItem from "../components/FlashCardItem";
+import FlashCardForm from "../components/FlashCardForm";
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
   const [studyCards, setStudyCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [createMode, setCreateMode] = useState(true);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedFlashCard, setSelectedFlashCard] = useState(0);
   const [radioButtonShowTitle, setRadioButtonShowTitle] = useState(true);
 
   useEffect(() => {
@@ -84,7 +88,20 @@ export default function FlashCardsPage() {
   }
 
   const deleteHandler = (flashCardId) => {
-    console.log(flashCardId);
+    setAllCards(allCards.filter((card) => card.id !== flashCardId));
+  };
+  const editHandler = (flashCard) => {
+    setCreateMode(false);
+    setSelectedTab(1);
+  };
+
+  const tabSelectHandler = (tabIndex) => {
+    setSelectedTab(tabIndex);
+  };
+
+  const newFlashCardHandler = () => {
+    setCreateMode(true);
+    setSelectedFlashCard(null);
   };
 
   let mainJsx = (
@@ -145,7 +162,7 @@ export default function FlashCardsPage() {
   return (
     <>
       <Header>react-flash-cards-v2</Header>
-      <Tabs>
+      <Tabs onSelect={tabSelectHandler} selectedIndex={selectedTab}>
         <TabList>
           <Tab>Listagem</Tab>
           <Tab>Cadastro</Tab>
@@ -155,14 +172,19 @@ export default function FlashCardsPage() {
         <TabPanel>
           {allCards.map((flashCard) => {
             return (
-              <FlashCardItem key={flashCard.id} onDelete={deleteHandler}>
+              <FlashCardItem
+                key={flashCard.id}
+                onEdit={editHandler}
+                onDelete={deleteHandler}
+              >
                 {flashCard}
               </FlashCardItem>
             );
           })}
         </TabPanel>
         <TabPanel>
-          <h2>Any content 2</h2>
+          <Button onButtonClick={newFlashCardHandler}>Novo Flash Card</Button>
+          <FlashCardForm createMode={createMode} />
         </TabPanel>
         <TabPanel>
           <Main>{mainJsx}</Main>

@@ -16,6 +16,12 @@ const FlashCardItem = ({
     }
   };
 
+  const handleEditIconClick = () => {
+    if (onEdit) {
+      onEdit(flashCard);
+    }
+  };
+
   return (
     <div className="border p-2 m-2">
       <ul className="flex flex-col space-y-4">
@@ -29,7 +35,11 @@ const FlashCardItem = ({
         </li>
       </ul>
       <div className="mt-4 flex flex-row items-center justify-end space-x-4">
-        <EditIcon className="cursor-pointer" size={24} />
+        <EditIcon
+          className="cursor-pointer"
+          onClick={handleEditIconClick}
+          size={24}
+        />
         <DeleteIcon
           className="cursor-pointer"
           onClick={handleDeleteIconClick}
