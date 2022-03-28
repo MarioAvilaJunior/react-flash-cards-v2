@@ -13,6 +13,7 @@ import { helperShuffleArray } from "../helpers/arrayHelpers";
 import Error from "../components/Error";
 import FlashCardItem from "../components/FlashCardItem";
 import FlashCardForm from "../components/FlashCardForm";
+import { getNewId } from "../services/idService";
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
@@ -93,6 +94,7 @@ export default function FlashCardsPage() {
   const editHandler = (flashCard) => {
     setCreateMode(false);
     setSelectedTab(1);
+    setSelectedFlashCard(flashCard);
   };
 
   const tabSelectHandler = (tabIndex) => {
@@ -104,11 +106,18 @@ export default function FlashCardsPage() {
     setSelectedFlashCard(null);
   };
 
-  const persistHandler = (createMode, title, description) => {
+  const persistHandler = (title, description) => {
     if (createMode) {
-      console.log("Criação");
+      setAllCards([...allCards, { id: getNewId(), title, description }]);
     } else {
-      console.log("Edição");
+      setAllCards(
+        allCards.map((flashCard) => {
+          if (flashCard.id === selectedFlashCard.id) {
+            return { ...flashCard, title, description };
+          }
+          return flashCard;
+        })
+      );
     }
   };
 
@@ -192,7 +201,9 @@ export default function FlashCardsPage() {
         </TabPanel>
         <TabPanel>
           <Button onButtonClick={newFlashCardHandler}>Novo Flash Card</Button>
-          <FlashCardForm createMode={createMode} onPersist={persistHandler} />
+          <FlashCardForm createMode={createMode} onPersist={persistHandler}>
+            {selectedFlashCard}
+          </FlashCardForm>
         </TabPanel>
         <TabPanel>
           <Main>{mainJsx}</Main>
