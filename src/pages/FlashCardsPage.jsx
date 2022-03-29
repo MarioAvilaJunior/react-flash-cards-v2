@@ -8,12 +8,18 @@ import Header from "../components/Header";
 import Main from "../components/Main";
 import RadioButton from "../components/RadioButton";
 import Loading from "../components/Loading";
-import { apiGetAllFlashCards } from "../services/apiService";
+import {
+  apiDeleteFlashCard,
+  apiGetAllFlashCards,
+  apiPostFlashCard,
+  apiPutFlashCard,
+} from "../services/apiService";
 import { helperShuffleArray } from "../helpers/arrayHelpers";
 import Error from "../components/Error";
 import FlashCardItem from "../components/FlashCardItem";
 import FlashCardForm from "../components/FlashCardForm";
 import { getNewId } from "../services/idService";
+import { postData } from "../services/httpService";
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
@@ -88,8 +94,16 @@ export default function FlashCardsPage() {
     setStudyCards(updatedCards);
   }
 
-  const deleteHandler = (flashCardId) => {
-    setAllCards(allCards.filter((card) => card.id !== flashCardId));
+  const deleteHandler = async (flashCardId) => {
+    try {
+      // Back End
+      await apiDeleteFlashCard(flashCardId);
+
+      // Front End
+      setAllCards(allCards.filter((card) => card.id !== flashCardId));
+    } catch (error) {
+      setError(error.message);
+    }
   };
   const editHandler = (flashCard) => {
     setCreateMode(false);
@@ -106,18 +120,43 @@ export default function FlashCardsPage() {
     setSelectedFlashCard(null);
   };
 
-  const persistHandler = (title, description) => {
+  const persistHandler = async (title, description) => {
     if (createMode) {
-      setAllCards([...allCards, { id: getNewId(), title, description }]);
+      try {
+        // Back End
+        const newFlashCard = await apiPostFlashCard(title, description);
+        // Front End
+        setAllCards([...allCards, newFlashCard]);
+
+        setError("");
+      } catch (error) {
+        setError(error.message);
+      }
     } else {
-      setAllCards(
-        allCards.map((flashCard) => {
-          if (flashCard.id === selectedFlashCard.id) {
-            return { ...flashCard, title, description };
-          }
-          return flashCard;
-        })
-      );
+      try {
+        // Back End
+        const UpdatedFlashCard = await apiPutFlashCard(
+          selectedFlashCard.id,
+          title,
+          description
+        );
+
+        //Front End
+        setAllCards(
+          allCards.map((flashCard) => {
+            if (flashCard.id === selectedFlashCard.id) {
+              //return { ...flashCard, title, description };
+              return UpdatedFlashCard;
+            }
+            return flashCard;
+          })
+        );
+        setSelectedFlashCard(null);
+        setCreateMode(true);
+        setError("");
+      } catch (error) {
+        setError(error.message);
+      }
     }
   };
 
@@ -131,7 +170,7 @@ export default function FlashCardsPage() {
     mainJsx = <Error>{error}</Error>;
   }
 
-  if (!loading) {
+  if (!loading && !error) {
     mainJsx = (
       <>
         <div className="text-center mb-4">

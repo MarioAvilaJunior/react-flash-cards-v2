@@ -1,10 +1,35 @@
-import { get } from "./httpService";
-
-const BACK_END_URL = "http://localhost:3001/flashcards";
+import { deleteData, getData, postData, putData } from "./httpService";
+import { getNewId } from "./idService";
 
 const apiGetAllFlashCards = async () => {
-  const allFlashCards = await get(BACK_END_URL);
+  const allFlashCards = await getData("/flashcards");
   return allFlashCards;
 };
 
-export { apiGetAllFlashCards };
+const apiDeleteFlashCard = async (cardId) => {
+  await deleteData(`/flashcards/${cardId}`);
+};
+
+const apiPostFlashCard = async (title, description) => {
+  const newFlashCard = postData("/flashcards", {
+    id: getNewId(),
+    title,
+    description,
+  });
+  return newFlashCard;
+};
+
+const apiPutFlashCard = async (cardId, title, description) => {
+  const updatedFlashCard = putData(`/flashcards/${cardId}`, {
+    title,
+    description,
+  });
+  return updatedFlashCard;
+};
+
+export {
+  apiDeleteFlashCard,
+  apiGetAllFlashCards,
+  apiPostFlashCard,
+  apiPutFlashCard,
+};
